@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "903257115091",
+    "project_id": "matchmotion-56add",
+    "storage_bucket": "matchmotion-56add.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:903257115091:android:61c3e455bf8a5c22c04726",
+        "android_client_info": {
+          "package_name": "com.jinyuan.matchmotion"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlILBr8kUaoPnTp9Apeo5SKLDEAAJt2qI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
