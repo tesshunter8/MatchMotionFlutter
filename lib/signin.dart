@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:untitled/createaccount.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:untitled/test.dart';
+import 'package:untitled/util/AuthStorage.dart';
 
 import 'home.dart';
 
@@ -17,19 +21,28 @@ class _SignInScreenState extends State<SignInScreen> {
   final GlobalKey<FormState> Formkey=GlobalKey<FormState>();
   final TextEditingController emailcontroller=TextEditingController();
   final TextEditingController passwordcontroller=TextEditingController();
+  final String baseUrl="http://10.0.2.2:5000";
+  String? IdToken;
+  Future<bool> login(String email, String password) async {
+    final res = await http.post(
+      Uri.parse("$baseUrl/auth/login"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"email": email, "password": password}),
+    );
+    if (res.statusCode == 200) {
+      final data = jsonDecode(res.body);
+      setState(() {
+        IdToken = data["idToken"];
+        print("Login success: token stored.");
 
-  Future<bool> signIn(String email, String password) async {
-    try {
-      print ("Attempting to log in...");
-      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: email,
-          password: password
-      );
+      });
+      await AuthStorage.saveTokens(data["idToken"],data["refreshToken"]);
       return true;
-    } on FirebaseAuthException catch (e) {
-      print(e);
+    } else {
+      print("Login failed: ${res.body}");
       return false;
     }
+
   }
   @override
   Widget build(BuildContext context) {
@@ -118,7 +131,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       ElevatedButton.icon(
                         onPressed: () {
                           if (Formkey.currentState!.validate()){
-                           signIn(emailcontroller.text, passwordcontroller.text).then((bool returnedValue){
+                           login(emailcontroller.text, passwordcontroller.text).then((bool returnedValue){
                             if (returnedValue==true){
                               print ("Log in successful");
                               Navigator.push(context, MaterialPageRoute(builder: (context)=>HomePage()));

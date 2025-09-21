@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:untitled/library.dart';
 import 'package:untitled/signin.dart';
 import 'package:untitled/test.dart';
 import 'package:untitled/video.dart';
@@ -11,7 +12,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List <Widget> screens=[VideoScreen(), TestPage(title: ""), SignInScreen()];
+  List <Widget> screens=[LibraryScreen(), VideoScreen(), SignInScreen()];
   int currentPage=0;
   void changePage(int chosenPage){
     setState(() {

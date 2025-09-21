@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:untitled/signin.dart';
 
 class CreateAccountScreen extends StatefulWidget {
@@ -10,6 +13,17 @@ class CreateAccountScreen extends StatefulWidget {
 }
 
 class _CreateAccountScreenState extends State<CreateAccountScreen> {
+  final String baseUrl="http://10.0.2.2:5000";
+  final TextEditingController emailcontroller=TextEditingController();
+  final TextEditingController passwordcontroller=TextEditingController();
+  Future<void> register(String email, String password) async {
+    final res = await http.post(
+      Uri.parse("$baseUrl/auth/register"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"email": email, "password": password}),
+    );
+    print("Register: ${res.body}");
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,7 +45,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
             ),
             SizedBox( width: 300,
               child: TextFormField(
-                initialValue: '',
+                controller: emailcontroller,
                 decoration: InputDecoration(
                   labelText: 'Email',
                   //errorText: 'Error message',
@@ -46,7 +60,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
 
             SizedBox( width: 300,
               child: TextFormField(obscureText: true,
-                initialValue: '',
+                controller: passwordcontroller,
                 decoration: InputDecoration(
                   labelText: 'Password',
                   //errorText: 'Error message',
@@ -77,7 +91,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
             ),
             ElevatedButton.icon(
               onPressed: () {
-                // Respond to button press
+                register(emailcontroller.text, passwordcontroller.text);
+                // Register
               },
               icon: Icon(Icons.check, size: 18),
               label: Text("Sign up"),
