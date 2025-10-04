@@ -16,13 +16,21 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   final String baseUrl="http://10.0.2.2:5000";
   final TextEditingController emailcontroller=TextEditingController();
   final TextEditingController passwordcontroller=TextEditingController();
-  Future<void> register(String email, String password) async {
+  Future<bool> register(String email, String password) async {
     final res = await http.post(
       Uri.parse("$baseUrl/auth/register"),
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({"email": email, "password": password}),
     );
     print("Register: ${res.body}");
+    if(res.statusCode==201)
+      {
+        return true;
+      }
+    else
+      {
+        return false;
+      }
   }
   @override
   Widget build(BuildContext context) {
@@ -90,9 +98,14 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
               ),
             ),
             ElevatedButton.icon(
-              onPressed: () {
-                register(emailcontroller.text, passwordcontroller.text);
+              onPressed: () async {
+                bool success=await register(emailcontroller.text, passwordcontroller.text);
                 // Register
+                if (success==true)
+                {
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>SignInScreen()));
+                }
+
               },
               icon: Icon(Icons.check, size: 18),
               label: Text("Sign up"),

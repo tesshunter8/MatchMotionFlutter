@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:untitled/util/AuthStorage.dart';
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
@@ -9,6 +13,35 @@ class LibraryScreen extends StatefulWidget {
 
 class _LibraryScreenState extends State<LibraryScreen> {
   String sortBy="Date, recent";
+  List<Map<String, dynamic>> _videos = [];
+
+  Future<List<Map<String, dynamic>>> fetchUserVideos() async {
+    final idToken = await AuthStorage.getIdToken();
+
+    final res = await http.get(
+      Uri.parse("http://10.0.2.2:5000/user/data"), // same endpoint
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $idToken",
+      },
+    );
+
+    if (res.statusCode == 200) {
+      final data = jsonDecode(res.body) as List;
+      return data.map((doc) => doc as Map<String, dynamic>).toList();
+    } else {
+      throw Exception("Failed to fetch videos: ${res.body}");
+    }
+  }
+  @override
+  void initState() {
+    super.initState();
+    fetchUserVideos().then((data) {
+      setState(() {
+        _videos = data;
+      });
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,19 +87,22 @@ class _LibraryScreenState extends State<LibraryScreen> {
           Expanded(
             child: Container(
 
-              child: ListView(
-                children: [
-                  VideoTile(name: "Test", date: "2025/9/6", duration: "2 mins 2 secs"),
-                  VideoTile(name: "Test", date: "2025/9/6", duration: "2 mins 2 secs"),
-                  VideoTile(name: "Test", date: "2025/9/6", duration: "2 mins 2 secs"),
-                  VideoTile(name: "Test", date: "2025/9/6", duration: "2 mins 2 secs"),
-                  VideoTile(name: "Test", date: "2025/9/6", duration: "2 mins 2 secs"),
-                  VideoTile(name: "Test", date: "2025/9/6", duration: "2 mins 2 secs"),
-                  VideoTile(name: "Test", date: "2025/9/6", duration: "2 mins 2 secs"),
-                ],
+              child:
+                ListView.builder(
+                  itemCount: _videos.length,
+                  itemBuilder: (context, index) {
+                    final video = _videos[index];
+                    return VideoTile(
+                      name: video["name"] ?? "Unnamed",
+                      date: video["createdAt"] ?? "Unknown",
+                      duration: video["length"] ?? "N/A",
+                    );
+                  },
+                ),
+
               ),
             ),
-          )
+
         ],
       ),
     );
