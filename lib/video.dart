@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:untitled/util/AuthStorage.dart';
+import 'package:untitled/util/Constants.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoScreen extends StatefulWidget {
@@ -26,7 +27,7 @@ class _VideoScreenState extends State<VideoScreen> {
   // small tolerance to detect "end" (accounts for small timing differences)
   static const Duration _endTolerance = Duration(milliseconds: 200);
 
-  final String baseUrl="http://10.0.2.2:5000";
+
   late XFile video;
   void ChooseVideo()async{
     final XFile? pickedvideo=await imagePicker.pickVideo(source: ImageSource.gallery);
@@ -84,7 +85,7 @@ class _VideoScreenState extends State<VideoScreen> {
     }
   }
   Future<void>sendvideotoserver()async{
-    var uri = Uri.parse("http://10.0.2.2:5000/upload"); // use 10.0.2.2 for Android emulator, or localhost for web
+    var uri = Uri.parse("${Constants.BaseUrl}/upload"); // use 10.0.2.2 for Android emulator, or localhost for web
 
     final mimeTypeData = lookupMimeType(video.path)?.split('/') ?? ['image', 'jpeg'];
 
@@ -116,7 +117,7 @@ class _VideoScreenState extends State<VideoScreen> {
   Future<void>storeindatabase(String videoname)async{
     final idToken=await AuthStorage.getIdToken();
     final res = await http.post(
-      Uri.parse("$baseUrl/user/data"),
+      Uri.parse("${Constants.BaseUrl}/user/data"),
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer $idToken"

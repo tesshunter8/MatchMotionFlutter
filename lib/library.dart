@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:untitled/util/AuthStorage.dart';
+import 'package:untitled/util/Constants.dart';
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
@@ -14,12 +17,13 @@ class LibraryScreen extends StatefulWidget {
 class _LibraryScreenState extends State<LibraryScreen> {
   String sortBy="Date, recent";
   List<Map<String, dynamic>> _videos = [];
-
+  List<Map<String, dynamic>> _filteredvideos = [];
+  final NameController=TextEditingController();
   Future<List<Map<String, dynamic>>> fetchUserVideos() async {
     final idToken = await AuthStorage.getIdToken();
 
     final res = await http.get(
-      Uri.parse("http://10.0.2.2:5000/user/data"), // same endpoint
+      Uri.parse("${Constants.BaseUrl}/user/data"), // same endpoint
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer $idToken",
@@ -33,12 +37,37 @@ class _LibraryScreenState extends State<LibraryScreen> {
       throw Exception("Failed to fetch videos: ${res.body}");
     }
   }
+  void filtervideos(String name){
+    setState(() {
+      _filteredvideos=_videos.where((video)=>video["name"].toString().startsWith(name)).toList();
+      if (sortBy=="Date, recent"){
+        _filteredvideos.sort((a,b){
+          final VideoDateA=DateTime.parse(a["createdAt"]);
+          final VideoDateB=DateTime.parse(b["createdAt"]);
+          return VideoDateB.compareTo(VideoDateA);
+        });
+      }
+      else if (sortBy=="Date, oldest"){
+        _filteredvideos.sort((a,b){
+          final VideoDateA=DateTime.parse(a["createdAt"]);
+          final VideoDateB=DateTime.parse(b["createdAt"]);
+          return VideoDateA.compareTo(VideoDateB);
+        });
+      }
+      else if (sortBy=="Name, a-z"){
+        _filteredvideos.sort((a,b)=>a["name"].compareTo(b["name"]));
+      }
+    });
+
+  }
   @override
   void initState() {
     super.initState();
     fetchUserVideos().then((data) {
       setState(() {
         _videos = data;
+        _filteredvideos=_videos;
+        print(_videos);
       });
     });
   }
@@ -56,7 +85,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SizedBox( width: 200,
-                  child: TextField(decoration:InputDecoration(
+                  child: TextField(
+                      controller: NameController,
+                      onChanged: (Name)=>filtervideos(Name),
+                      decoration:InputDecoration(
                       labelText: "Video Name",
                       border: OutlineInputBorder()
                   )
@@ -78,6 +110,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     onChanged: (String? value){
                       setState(() {
                         sortBy=value!;
+                        filtervideos(NameController.text);
                       });
                     }
                 )
@@ -89,9 +122,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
               child:
                 ListView.builder(
-                  itemCount: _videos.length,
+                  itemCount: _filteredvideos.length,
                   itemBuilder: (context, index) {
-                    final video = _videos[index];
+                    final video = _filteredvideos[index];
                     return VideoTile(
                       name: video["name"] ?? "Unnamed",
                       date: video["createdAt"] ?? "Unknown",
@@ -111,8 +144,13 @@ class _LibraryScreenState extends State<LibraryScreen> {
 class VideoTile extends StatelessWidget {
   final String name;
   final String date;
-  final String duration;
+  final int duration;
   const VideoTile({super.key, required this.name, required this.date, required this.duration});
+  String readableDate(String date) {
+    final dt = DateTime.parse(date).toLocal(); // convert from UTC to local time
+    final formatter = DateFormat('MMM d, yyyy • h:mm a'); // e.g. Oct 4, 2025 • 7:37 PM
+    return formatter.format(dt);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -137,8 +175,8 @@ class VideoTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(name, style: TextStyle(fontSize: 27),),
-                  Text(date),
-                  Text(duration)
+                  Text(readableDate(date)),
+                  Text(duration.toString())
                 ],
               ),
             ),

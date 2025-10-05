@@ -7,6 +7,7 @@ import 'package:untitled/createaccount.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:untitled/test.dart';
 import 'package:untitled/util/AuthStorage.dart';
+import 'package:untitled/util/Constants.dart';
 
 import 'home.dart';
 
@@ -21,11 +22,11 @@ class _SignInScreenState extends State<SignInScreen> {
   final GlobalKey<FormState> Formkey=GlobalKey<FormState>();
   final TextEditingController emailcontroller=TextEditingController();
   final TextEditingController passwordcontroller=TextEditingController();
-  final String baseUrl="http://10.0.2.2:5000";
+
   String? IdToken;
   Future<bool> login(String email, String password) async {
     final res = await http.post(
-      Uri.parse("$baseUrl/auth/login"),
+      Uri.parse("${Constants.BaseUrl}/auth/login"),
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({"email": email, "password": password}),
     );
@@ -134,7 +135,7 @@ class _SignInScreenState extends State<SignInScreen> {
                            login(emailcontroller.text, passwordcontroller.text).then((bool returnedValue){
                             if (returnedValue==true){
                               print ("Log in successful");
-                              Navigator.push(context, MaterialPageRoute(builder: (context)=>HomePage()));
+                              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
                             }
                            });
                           }
