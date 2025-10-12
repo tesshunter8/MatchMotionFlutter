@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/gestures.dart';
@@ -27,8 +28,15 @@ class _SignInScreenState extends State<SignInScreen> {
   Future<bool> login(String email, String password) async {
     final res = await http.post(
       Uri.parse("${Constants.BaseUrl}/auth/login"),
-      headers: {"Content-Type": "application/json"},
+      headers: {
+        "Content-Type": "application/json", 'ngrok-skip-browser-warning': 'true',
+      },
       body: jsonEncode({"email": email, "password": password}),
+    ).timeout(
+      Duration(seconds: 15),
+      onTimeout: (){
+        throw TimeoutException("15 seconds have passed");
+      }
     );
     if (res.statusCode == 200) {
       final data = jsonDecode(res.body);

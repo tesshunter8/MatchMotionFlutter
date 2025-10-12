@@ -151,7 +151,15 @@ class VideoTile extends StatelessWidget {
     final formatter = DateFormat('MMM d, yyyy • h:mm a'); // e.g. Oct 4, 2025 • 7:37 PM
     return formatter.format(dt);
   }
-
+  String formatDuration(int seconds){
+    int mins=(seconds/60).toInt();
+    int sec=(seconds-mins*60);
+    if (sec<=9){
+      return "$mins:0$sec";
+    } else {
+      return "$mins:$sec";
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -176,7 +184,7 @@ class VideoTile extends StatelessWidget {
                 children: [
                   Text(name, style: TextStyle(fontSize: 27),),
                   Text(readableDate(date)),
-                  Text(duration.toString())
+                  Text(formatDuration(duration))
                 ],
               ),
             ),

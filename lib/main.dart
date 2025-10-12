@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:untitled/analysis/analysis.dart';
 import 'package:untitled/circleimage.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:untitled/home.dart';
@@ -24,7 +25,7 @@ class MyApp extends StatelessWidget {
 
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const SignInScreen()
+      home: const HomePage()
     );
   }
 }
