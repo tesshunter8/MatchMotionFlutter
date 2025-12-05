@@ -22,15 +22,15 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({"email": email, "password": password}),
     );
-    print("Register: ${res.body}");
-    if(res.statusCode==201)
-      {
-        return true;
-      }
-    else
-      {
-        return false;
-      }
+    if(res.statusCode==201) {
+      return true;
+    } else if(mounted){
+      final body = jsonDecode(res.body);
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(body["error"]))
+      );
+    }
+    return false;
   }
   @override
   Widget build(BuildContext context) {
@@ -105,7 +105,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 {
                   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>SignInScreen()));
                 }
-
               },
               icon: Icon(Icons.check, size: 18),
               label: Text("Sign up"),

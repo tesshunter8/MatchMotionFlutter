@@ -1,3 +1,3 @@
 class Constants{
-  static const BaseUrl="https://keva-muriatic-in.ngrok-free.dev";
+  static const BaseUrl="http://10.0.2.2:5000";
 }

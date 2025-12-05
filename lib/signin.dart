@@ -47,11 +47,13 @@ class _SignInScreenState extends State<SignInScreen> {
       });
       await AuthStorage.saveTokens(data["idToken"],data["refreshToken"]);
       return true;
-    } else {
-      print("Login failed: ${res.body}");
-      return false;
-    }
+    } else if(mounted){
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Email doesn't exist or incorrect password!"))
+      );
 
+    }
+    return false;
   }
   @override
   Widget build(BuildContext context) {
