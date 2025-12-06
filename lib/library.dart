@@ -7,6 +7,8 @@ import 'package:intl/intl.dart';
 import 'package:untitled/util/AuthStorage.dart';
 import 'package:untitled/util/Constants.dart';
 
+import 'analysis/analysis.dart';
+
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
 
@@ -128,7 +130,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     return VideoTile(
                       name: video["name"] ?? "Unnamed",
                       date: video["createdAt"] ?? "Unknown",
-                      duration: video["length"] ?? "N/A",
+                      duration: video["video_length"].round() ?? "N/A", VideoData: video,
                     );
                   },
                 ),
@@ -145,7 +147,8 @@ class VideoTile extends StatelessWidget {
   final String name;
   final String date;
   final int duration;
-  const VideoTile({super.key, required this.name, required this.date, required this.duration});
+  final Map<String, dynamic> VideoData;
+  const VideoTile({super.key, required this.name, required this.date, required this.duration, required this.VideoData});
   String readableDate(String date) {
     final dt = DateTime.parse(date).toLocal(); // convert from UTC to local time
     final formatter = DateFormat('MMM d, yyyy • h:mm a'); // e.g. Oct 4, 2025 • 7:37 PM
@@ -162,34 +165,39 @@ class VideoTile extends StatelessWidget {
   }
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 120,
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: Colors.grey
-        )
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Container(
-            width: 230,
-            color: Colors.red,
-          ),
-          Center(
-            child: Container(
-              width: 150,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(name, style: TextStyle(fontSize: 27),),
-                  Text(readableDate(date)),
-                  Text(formatDuration(duration))
-                ],
-              ),
-            ),
+    return GestureDetector(
+      onTap: (){
+        Navigator.push(context, MaterialPageRoute(builder: (_)=>AnalysisScreen(VideoData: VideoData,)));
+      },
+      child: Container(
+        height: 120,
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: Colors.grey
           )
-        ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              width: 230,
+              color: Colors.red,
+            ),
+            Center(
+              child: Container(
+                width: 150,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(name, style: TextStyle(fontSize: 27),),
+                    Text(readableDate(date)),
+                    Text(formatDuration(duration))
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

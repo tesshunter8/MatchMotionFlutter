@@ -90,6 +90,8 @@ class _VideoScreenState extends State<VideoScreen> {
     final mimeTypeData = lookupMimeType(video.path)?.split('/') ?? ['image', 'jpeg'];
 
     final request = http.MultipartRequest("POST", uri)
+      ..fields["userId"]=(await AuthStorage.getIdToken())!
+      ..fields["name"]=_nameController.text
       ..files.add(
         await http.MultipartFile.fromPath(
           'file', // name must match the Flask form field
@@ -105,7 +107,7 @@ class _VideoScreenState extends State<VideoScreen> {
         // You can read the response body if needed:
         final body = await response.stream.bytesToString();
         print("Response body: $body");
-        storeindatabase("test");
+        // storeindatabase("test");
       } else {
         print("Upload failed with status: ${response.statusCode}");
       }
@@ -114,24 +116,24 @@ class _VideoScreenState extends State<VideoScreen> {
     }
   }
 
-  Future<void>storeindatabase(String videoname)async{
-    final idToken=await AuthStorage.getIdToken();
-    final res = await http.post(
-      Uri.parse("${Constants.BaseUrl}/user/data"),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $idToken"
-      },
-      body: jsonEncode(
-          {
-            "name": videoname,
-            "createdAt":DateTime.now().toUtc().toIso8601String(),
-            "length": 0
-          }
-      ),
-    );
-    print(res.body);
-  }
+  // Future<void>storeindatabase(String videoname)async{
+  //   final idToken=await AuthStorage.getIdToken();
+  //   final res = await http.post(
+  //     Uri.parse("${Constants.BaseUrl}/user/data"),
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       "Authorization": "Bearer $idToken"
+  //     },
+  //     body: jsonEncode(
+  //         {
+  //           "name": videoname,
+  //           "createdAt":DateTime.now().toUtc().toIso8601String(),
+  //           "length": 0
+  //         }
+  //     ),
+  //   );
+  //   print(res.body);
+  // }
   Future<void> _playPause() async {
     if (_controller == null) return;
     final value = _controller!.value;
@@ -225,7 +227,7 @@ class _VideoScreenState extends State<VideoScreen> {
             ],
             SizedBox( height: 30,),
             SizedBox( width: 300,
-             child: TextField(decoration:InputDecoration(
+             child: TextField(controller:_nameController, decoration:InputDecoration(
                labelText: "Video Name",
                border: OutlineInputBorder()
              )
